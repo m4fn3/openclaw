@@ -306,7 +306,7 @@ public actor OpenClawWatchMessageJournal {
         }
     }
 
-    // iOS 17 backport: `some AsyncSequence<Element, Failure>` needs iOS 18; return GRDB's concrete sequence.
+    /// iOS 17 backport: `some AsyncSequence<Element, Failure>` needs iOS 18; return GRDB's concrete sequence.
     public func changes(owner: OpenClawWatchMessageOwner? = nil) async throws
         -> AsyncValueObservation<[OpenClawWatchMessageEntry]>
     {

@@ -38,7 +38,7 @@ public final class OpenClawChatSessionSidebarData {
 
     public init() {}
 
-    // iOS 17 backport: plain deinit (`isolated deinit` needs iOS 18.4); `queryTask` is Sendable.
+    /// iOS 17 backport: plain deinit (`isolated deinit` needs iOS 18.4); `queryTask` is Sendable.
     deinit { self.queryTask?.cancel() }
 
     func invalidateQueryProjection() {
