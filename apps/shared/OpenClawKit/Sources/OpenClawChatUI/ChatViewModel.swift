@@ -606,8 +606,11 @@ public final class OpenClawChatViewModel {
         }
     }
 
-    isolated deinit {
-        self.detachTransport()
+    deinit {
+        // iOS 17 backport: `isolated deinit` needs the iOS 18.4 runtime. SwiftUI releases this
+        // model on the main thread; never trap if a stray reference drops elsewhere.
+        guard Thread.isMainThread else { return }
+        MainActor.assumeIsolated { self.detachTransport() }
     }
 
     /// Permanently retires a replaced presentation without aborting its gateway run.

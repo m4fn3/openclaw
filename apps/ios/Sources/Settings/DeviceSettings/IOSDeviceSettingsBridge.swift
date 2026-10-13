@@ -430,5 +430,10 @@ final class IOSDeviceSettingsBridge: NSObject, WKScriptMessageHandlerWithReply {
         }
     }
 
-    isolated deinit { self.detach() }
+    deinit {
+        // iOS 17 backport: `isolated deinit` needs the iOS 18.4 runtime. Views release this
+        // bridge on the main thread; never trap if a stray reference drops elsewhere.
+        guard Thread.isMainThread else { return }
+        MainActor.assumeIsolated { self.detach() }
+    }
 }
