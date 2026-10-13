@@ -56,7 +56,11 @@ public enum OpenClawChatTheme {
 
     static func desktopUserBubble(in colorScheme: ColorScheme, accent: Color?) -> Color {
         // Bound the accent contribution so even its lightest/darkest extremes retain reading contrast.
-        self.desktopCanvas(in: colorScheme)
+        guard #available(iOS 18.0, *) else {
+            // iOS 17 backport: `Color.mix(with:by:in:)` is iOS 18+; approximate with a 15% accent tint.
+            return (accent ?? self.desktopAccent(in: colorScheme)).opacity(0.15)
+        }
+        return self.desktopCanvas(in: colorScheme)
             .mix(with: accent ?? self.desktopAccent(in: colorScheme), by: 0.15, in: .device)
     }
 

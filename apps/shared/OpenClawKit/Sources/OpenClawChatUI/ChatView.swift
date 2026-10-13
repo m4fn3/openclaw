@@ -441,27 +441,23 @@ extension OpenClawChatView {
             .safeAreaInset(edge: .top, spacing: 0) {
                 self.messageListNoticeBanner(hasVisibleContent: hasVisibleContent)
             }
-            .onScrollGeometryChange(for: Bool.self) { geometry in
-                let distanceFromBottom = geometry.contentSize.height - geometry.visibleRect.maxY
-                return distanceFromBottom <= Layout.liveEdgeThreshold
-            } action: { _, isAtLiveEdge in
+            .modifier(ChatReaderScrollObserversModifier(liveEdgeThreshold: Layout.liveEdgeThreshold) { isAtLiveEdge in
                 self.isAtLiveEdge = isAtLiveEdge
                 guard self.hasPerformedInitialScroll else { return }
                 if isAtLiveEdge, !self.isUserScrolling, !self.isFollowingTurn, self.searchMessageID == nil {
                     self.followTarget = .latest
                     self.hasNewerContentBelow = false
                 }
-            }
-            .onScrollPhaseChange { _, phase in
+            } onPhaseChange: { phase in
                 guard self.hasPerformedInitialScroll else { return }
-                if phase == .interacting {
+                if phase.isInteracting {
                     self.restoresLiveEdgeAfterKeyboardShows = false
                 }
-                if chatReaderScrollReleasesFollow(phase) {
+                if phase.releasesFollow {
                     self.scrollCommand.cancel()
                     self.isUserScrolling = true
                     self.followTarget = nil
-                } else if phase == .idle, self.isUserScrolling {
+                } else if phase.isIdle, self.isUserScrolling {
                     self.isUserScrolling = false
                     if self.isAtLiveEdge {
                         self.followTarget = .latest
@@ -470,7 +466,7 @@ extension OpenClawChatView {
                         self.hasNewerContentBelow = true
                     }
                 }
-            }
+            })
 
             if self.viewModel.isLoading, self.composerChrome == .full {
                 ProgressView()

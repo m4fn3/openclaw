@@ -3,6 +3,7 @@ import SwiftUI
 /// The view's own one-shot positioning always runs in a nil-animation transaction, so
 /// `.animating` only comes from system scrolls (status-bar scroll-to-top, keyboard
 /// avoidance). Not releasing there lets the next timeline tick yank the reader back down.
+@available(iOS 18.0, *)
 func chatReaderScrollReleasesFollow(_ phase: ScrollPhase) -> Bool {
     switch phase {
     case .interacting, .animating:
@@ -11,6 +12,42 @@ func chatReaderScrollReleasesFollow(_ phase: ScrollPhase) -> Bool {
         false
     @unknown default:
         false
+    }
+}
+
+/// The parts of a `ScrollPhase` transition the reader acts on, so `ChatView` can stay iOS 17 compatible.
+struct ChatReaderScrollPhaseChange {
+    let isInteracting: Bool
+    let releasesFollow: Bool
+    let isIdle: Bool
+}
+
+/// iOS 17 backport: `onScrollGeometryChange` / `onScrollPhaseChange` are iOS 18+. On iOS 17 neither
+/// callback fires, so the reader stays at the live edge and keeps following the latest message.
+struct ChatReaderScrollObserversModifier: ViewModifier {
+    let liveEdgeThreshold: CGFloat
+    let onLiveEdgeChange: @MainActor (Bool) -> Void
+    let onPhaseChange: @MainActor (ChatReaderScrollPhaseChange) -> Void
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            let liveEdgeThreshold = self.liveEdgeThreshold
+            content
+                .onScrollGeometryChange(for: Bool.self) { geometry in
+                    let distanceFromBottom = geometry.contentSize.height - geometry.visibleRect.maxY
+                    return distanceFromBottom <= liveEdgeThreshold
+                } action: { _, isAtLiveEdge in
+                    self.onLiveEdgeChange(isAtLiveEdge)
+                }
+                .onScrollPhaseChange { _, phase in
+                    self.onPhaseChange(ChatReaderScrollPhaseChange(
+                        isInteracting: phase == .interacting,
+                        releasesFollow: chatReaderScrollReleasesFollow(phase),
+                        isIdle: phase == .idle))
+                }
+        } else {
+            content
+        }
     }
 }
 

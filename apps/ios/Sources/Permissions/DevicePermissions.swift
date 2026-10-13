@@ -3,15 +3,22 @@ import EventKit
 import OpenClawKit
 import Photos
 
+extension CNAuthorizationStatus {
+    /// iOS 17 backport: `CNAuthorizationStatus.limited` is iOS 18+ and cannot be referenced unguarded.
+    var isLimitedCompat: Bool {
+        if #available(iOS 18.0, *) { return self == .limited }
+        return false
+    }
+}
+
 /// Native authorization states map directly to the shared snapshot vocabulary.
 enum DevicePermissionStatusMap {
     static func contacts(_ status: CNAuthorizationStatus) -> DeviceSettingsPermissionStatus {
         switch status {
         case .authorized: .granted
-        case .limited: .limited
         case .notDetermined: .notDetermined
         case .denied, .restricted: .denied
-        @unknown default: .denied
+        @unknown default: status.isLimitedCompat ? .limited : .denied
         }
     }
 

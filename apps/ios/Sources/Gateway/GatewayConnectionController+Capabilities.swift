@@ -186,7 +186,7 @@ extension GatewayConnectionController {
 
         permissions["photos"] = PhotoLibraryAccess.canRead(PhotoLibraryAccess.authorizationStatus())
         let contactsStatus = CNContactStore.authorizationStatus(for: .contacts)
-        permissions["contacts"] = contactsStatus == .authorized || contactsStatus == .limited
+        permissions["contacts"] = contactsStatus == .authorized || contactsStatus.isLimitedCompat
 
         let calendarStatus = EKEventStore.authorizationStatus(for: .event)
         permissions["calendar"] = Self.hasEventKitReadAccess(calendarStatus)

@@ -108,7 +108,7 @@ final class ContactsService: ContactsServicing {
 
     private func authorizedStore() throws -> CNContactStore {
         let status = self.authorizationStatus()
-        guard status == .authorized || status == .limited else {
+        guard status == .authorized || status.isLimitedCompat else {
             throw NSError(domain: "Contacts", code: 1, userInfo: [
                 NSLocalizedDescriptionKey: "CONTACTS_PERMISSION_REQUIRED: grant Contacts permission",
             ])
