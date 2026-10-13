@@ -157,9 +157,20 @@ final class OpenClawAppDelegate: NSObject, UIApplicationDelegate, @preconcurrenc
         notificationCenter.delegate = self
         ApprovalNotificationBridge.registerCategories(center: notificationCenter)
         Task { @MainActor in
+            await self.requestNotificationPermissionOnIOS17IfNeeded()
             await self.registerForRemoteNotificationsIfEnrollmentReady(application)
         }
         return true
+    }
+
+    /// iOS 17 backport: the only notification prompt lives in the Control UI settings page,
+    /// which does not load on iOS 17 WebKit. Ask once at launch instead.
+    private func requestNotificationPermissionOnIOS17IfNeeded() async {
+        guard #unavailable(iOS 18.0) else { return }
+        guard !PushBuildConfig.current.usesOpenClawHostedRelay else { return }
+        let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+        guard status == .notDetermined else { return }
+        _ = await IOSDeviceSettingsActions.requestNotificationPermission(confirmDisclosure: { true })
     }
 
     func application(
