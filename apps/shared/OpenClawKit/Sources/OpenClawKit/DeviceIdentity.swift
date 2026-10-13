@@ -1,6 +1,5 @@
 import CryptoKit
 import Foundation
-import Synchronization
 #if canImport(Security)
 import Security
 #endif
@@ -67,7 +66,7 @@ struct DeviceIdentityStateRootState {
 
 enum DeviceIdentityPaths {
     @TaskLocal static var scopedStateDirURL: URL?
-    private static let configuredState = Mutex(DeviceIdentityStateRootState())
+    private static let configuredState = CompatMutex(DeviceIdentityStateRootState())
 
     /// Entitlements are fixed by the code signature for the lifetime of the process.
     private static let appGroupStateDirAvailable =

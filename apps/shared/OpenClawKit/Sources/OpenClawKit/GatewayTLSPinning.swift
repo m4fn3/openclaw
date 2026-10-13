@@ -1,7 +1,6 @@
 import CryptoKit
 import Foundation
 import Security
-import Synchronization
 
 public struct GatewayTLSParams: Equatable, Sendable {
     public let required: Bool
@@ -266,14 +265,14 @@ public enum GatewayTLSStore {
     }
 
     private static let baseKeychainService = "ai.openclaw.tls-pinning"
-    private static let keychainNamespace = Mutex(GatewayTLSKeychainNamespaceState())
+    private static let keychainNamespace = CompatMutex(GatewayTLSKeychainNamespaceState())
     private static var keychainService: String {
         self.keychainNamespace.withLock { $0.service(base: self.baseKeychainService) }
     }
 
     private static let keychainAccountPrefix = "fingerprint.v3."
     private static let legacyCanonicalAccountPrefix = "fingerprint.v2."
-    private static let firstUseClaims = Mutex<[String: String]>([:])
+    private static let firstUseClaims = CompatMutex<[String: String]>([:])
 
     /// The macOS app profile is immutable for the process lifetime. Configure its
     /// Keychain namespace before constructing any Gateway connection.

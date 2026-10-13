@@ -1,6 +1,6 @@
 import Foundation
+import OpenClawKit
 import SwiftUI
-import Synchronization
 
 struct ChatMessageMetadata: Equatable {
     let timestamp: Double?
@@ -72,7 +72,7 @@ struct ChatMessageTimestampPresentation: Equatable {
     let exact: String
 
     /// One locale/time-zone entry bounds retention. All formatter use stays under the lock.
-    private static let formatters = Mutex(Formatters(locale: .current, timeZone: .current))
+    private static let formatters = CompatMutex(Formatters(locale: .current, timeZone: .current))
 
     private struct Formatters {
         let locale: Locale

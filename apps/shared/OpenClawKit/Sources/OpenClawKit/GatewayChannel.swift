@@ -2,7 +2,6 @@ import CryptoKit
 import Foundation
 import OpenClawProtocol
 import OSLog
-import Synchronization
 
 /// Avoid ambiguity with the app's own AnyCodable type.
 private typealias ProtoAnyCodable = OpenClawProtocol.AnyCodable
@@ -40,7 +39,7 @@ public actor GatewayChannelActor {
     private var backoffMs: Double = 500
     var connectFailureBackoff = GatewayConnectFailureBackoff()
     private var shouldReconnect = true
-    private nonisolated let socketAdmission = Mutex(true)
+    private nonisolated let socketAdmission = CompatMutex(true)
     private var lastSeq: Int?
     private var liveTextProjection = GatewayLiveTextProjection()
     private var lastTick: Date?
@@ -1353,7 +1352,7 @@ extension GatewayChannelActor {
         // Zero leaves terminal-operation deadlines to the Gateway owner.
         let effectiveTimeout = Self.resolveRequestTimeoutMs(timeoutMs, defaultMs: self.defaultRequestTimeoutMs)
         let payload = try self.encodeRequest(method: method, params: params, kind: "request")
-        let cancellationGate = Mutex(false)
+        let cancellationGate = CompatMutex(false)
         let response: ResponseFrame
         do {
             response = try await withTaskCancellationHandler {

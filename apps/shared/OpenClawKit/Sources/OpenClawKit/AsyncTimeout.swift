@@ -1,5 +1,3 @@
-import Synchronization
-
 private final class AsyncTimeoutRace<T: Sendable>: Sendable {
     private enum State {
         case pending
@@ -8,7 +6,7 @@ private final class AsyncTimeoutRace<T: Sendable>: Sendable {
         case resolved([Task<Void, Never>])
     }
 
-    private let state = Mutex<State>(.pending)
+    private let state = CompatMutex<State>(.pending)
 
     func wait(
         seconds: Double,

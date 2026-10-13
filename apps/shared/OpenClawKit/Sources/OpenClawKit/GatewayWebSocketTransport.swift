@@ -1,5 +1,4 @@
 import Foundation
-import Synchronization
 
 public protocol WebSocketTasking: AnyObject {
     var state: URLSessionTask.State { get }
@@ -104,7 +103,7 @@ public struct WebSocketTaskBox: @unchecked Sendable {
 
     public func sendPing(timeout: Duration = WebSocketTaskBox.pingTimeout) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            let didResume = Mutex(false)
+            let didResume = CompatMutex(false)
             let finish: @Sendable (Error?) -> Void = { error in
                 let first = didResume.withLock { resumed in
                     guard !resumed else { return false }
