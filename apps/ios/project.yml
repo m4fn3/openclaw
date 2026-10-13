@@ -3,7 +3,7 @@ options:
   preGenCommand: node ../../scripts/prepare-apple-mermaid.mjs
   bundleIdPrefix: ai.openclawfoundation
   deploymentTarget:
-    iOS: "18.0"
+    iOS: "17.0"
   xcodeVersion: "26.0"
 
 settings:
